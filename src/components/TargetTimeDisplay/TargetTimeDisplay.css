@@ -1,0 +1,32 @@
+.target-time-display {
+  font-size: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .target-time-text-container {
+    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .description-positive {
+    background-color: var(--primary-green-color);
+    color: var(--primary-white-color);
+  }
+  .description-negative {
+    background-color: var(--primary-red-color);
+    color: var(--primary-white-color);
+  }
+
+  .description {
+    font-size: 24px;
+    font-weight: 600;
+    width: fit-content;
+    padding: 8px;
+    border-radius: 10px;
+  }
+}
