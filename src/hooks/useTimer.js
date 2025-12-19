@@ -4,6 +4,7 @@ import { useLocalStorage } from "@uidotdev/usehooks";
 const TIMER_TICK = 1000;
 
 const STARTED_AT_KEY = "timer-started-at";
+const ACCUMULATED_KEY = "timer-accumulated";
 const IS_RUNNING_KEY = "timer-is-running";
 
 export const useTimer = () => {
@@ -11,44 +12,55 @@ export const useTimer = () => {
 
   const [startedAt, setStartedAt] = useLocalStorage(STARTED_AT_KEY, null);
 
-  const [elapsed, setElapsed] = useState(0);
+  const [accumulated, setAccumulated] = useLocalStorage(ACCUMULATED_KEY, 0);
+
+  const [elapsed, setElapsed] = useState(accumulated);
   const intervalRef = useRef(null);
 
   const startTimer = () => {
-    if (!startedAt) {
+    if (!isRunning) {
       setStartedAt(Date.now());
+      setIsRunning(true);
     }
-    setIsRunning(true);
   };
 
   const stopTimer = () => {
+    if (isRunning && startedAt) {
+      const now = Date.now();
+      const seconds = Math.floor((now - startedAt) / 1000);
+      setAccumulated((prev) => prev + seconds);
+    }
+
+    setStartedAt(null);
     setIsRunning(false);
   };
 
   const resetTimer = () => {
     setIsRunning(false);
     setStartedAt(null);
+    setAccumulated(0);
     setElapsed(0);
   };
 
   useEffect(() => {
     if (!isRunning || !startedAt) {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      setElapsed(accumulated);
       return;
     }
 
     const update = () => {
-      const seconds = Math.floor((Date.now() - startedAt) / 1000);
+      const seconds = accumulated + Math.floor((Date.now() - startedAt) / 1000);
       setElapsed(seconds);
     };
 
-    update(); // run immediately
+    update();
     intervalRef.current = window.setInterval(update, TIMER_TICK);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isRunning, startedAt]);
+  }, [isRunning, startedAt, accumulated]);
 
   return [elapsed, startTimer, stopTimer, resetTimer, isRunning];
 };
